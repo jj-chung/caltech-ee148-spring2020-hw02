@@ -1,14 +1,17 @@
 import numpy as np
 import os
+import json
 
 np.random.seed(2020) # to ensure you always get the same train/test split
 
-data_path = '../data/RedLights2011_Medium'
-gts_path = '../data/hw02_annotations'
-split_path = '../data/hw02_splits'
-os.makedirs(preds_path, exist_ok=True) # create directory if needed
+data_path = './data/RedLights2011_Medium'
+gts_path = './data/hw02_annotations'
+split_path = './data/hw02_splits'
+#os.makedirs(preds_path, exist_ok=True) # create directory if needed
+os.makedirs(gts_path, exist_ok=True)
+os.makedirs(split_path, exist_ok=True)
 
-split_test = False # set to True and run when annotations are available
+split_test = True # set to True and run when annotations are available
 
 train_frac = 0.85
 
@@ -24,6 +27,15 @@ file_names_test = []
 '''
 Your code below. 
 '''
+
+# Shuffle the file names
+shuffled_file_names = np.random.permutation(file_names)
+
+# Take 85% of the data to be training data, 15% to be testing data
+train_num = int(train_frac * len(file_names))
+
+file_names_train = shuffled_file_names[:train_num]
+file_names_test = shuffled_file_names[train_num:]
 
 assert (len(file_names_train) + len(file_names_test)) == len(file_names)
 assert len(np.intersect1d(file_names_train,file_names_test)) == 0
@@ -42,6 +54,11 @@ if split_test:
     '''
     Your code below. 
     '''
+    for fname, preds in gts.items():
+        if fname in file_names_train:
+            gts_train[fname] = preds
+        elif fname in file_names_test:
+            gts_test[fname] = preds
     
     with open(os.path.join(gts_path, 'annotations_train.json'),'w') as f:
         json.dump(gts_train,f)
